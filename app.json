@@ -7,6 +7,12 @@
       "ios",
       "android",
       "web"
-    ]
+    ],
+    "android": {
+      "package": "com.anonymous.myuikittestexample"
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.myuikittestexample"
+    }
   }
 }
