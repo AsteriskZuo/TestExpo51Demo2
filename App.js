@@ -1,104 +1,76 @@
-import * as React from 'react';
-import { Pressable, SafeAreaView, Text, View } from 'react-native';
+import * as React from "react";
+import { SendbirdUIKitContainer } from "@sendbird/uikit-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
-  Container,
-  ConversationDetail,
-  TextInput,
-  useChatContext,
-} from 'react-native-chat-uikit';
-const appKey = 'easemob-demo#support';
-const userId = 'hfp';
-const userPassword = '1';
-const usePassword = true; // or false;
-const peerId = 'pfh';
-function SendMessage() {
-  const [page, setPage] = React.useState(0);
-  const [appkey, setAppkey] = React.useState(appKey);
-  const [id, setId] = React.useState(userId);
-  const [ps, setPs] = React.useState(userPassword);
-  const [peer, setPeer] = React.useState(peerId);
-  const im = useChatContext();
+  GroupChannelListScreen,
+  GroupChannelCreateScreen,
+  GroupChannelScreen,
+} from "./OthersScreen";
+import { SignInScreen } from "./SignInScreen";
+import { platformServices } from "./services";
+import {
+  useSendbirdChat,
+} from '@sendbird/uikit-react-native';
+import firebase from "@react-native-firebase/app";
 
-  if (page === 0) {
-    return (
-      // 登录页面
-      <SafeAreaView style={{ flex: 1 }}>
-        <TextInput
-          placeholder='Please App Key.'
-          value={appkey}
-          onChangeText={setAppkey}
-        />
-        <TextInput
-          placeholder='Please Login ID.'
-          value={id}
-          onChangeText={setId}
-        />
-        <TextInput
-          placeholder='Please Login token or password.'
-          value={ps}
-          onChangeText={setPs}
-        />
-        <TextInput
-          placeholder='Please peer ID.'
-          value={peer}
-          onChangeText={setPeer}
-        />
-        <Pressable
-          onPress={() => {
-            console.log('test:zuoyu:login', id, ps);
-            im.login({
-              userId: id,
-              userToken: ps,
-              usePassword: usePassword,
-              result: (res) => {
-                console.log('login result', res);
-                console.log('test:zuoyu:error', res);
-                if (res.isOk === true) {
-                  setPage(1);
-                }
-              },
-            });
-          }}
-        >
-          <Text>{'Login'}</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => {
-            im.logout({
-              result: () => {},
-            });
-          }}
-        >
-          <Text>{'Logout'}</Text>
-        </Pressable>
-      </SafeAreaView>
-    );
-  } else if (page === 1) {
-    // 聊天页面
-    return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <ConversationDetail
-          convId={peer}
-          convType={0}
-          onBack={() => {
-            setPage(0);
-            im.logout({
-              result: () => {},
-            });
-          }}
-          type={'chat'}
-        />
-      </SafeAreaView>
-    );
-  } else {
-    return <View />;
-  }
-}
+const RNfirebaseConfig = {
+  apiKey: "",
+  authDomain: "note-app-rn.firebaseapp.com",
+  projectId: "note-app-rn",
+  storageBucket: "note-app-rn.appspot.com",
+  messagingSenderId: "",
+  appId: "",
+};
 
-export default function App() {
+firebase.initializeApp(RNfirebaseConfig);
+
+// let app;
+// if (firebase.apps.length === 0) {
+//   app = firebase.initializeApp(RNfirebaseConfig);
+// } else {
+//   app = firebase.app();
+// }
+
+const RootStack = createNativeStackNavigator();
+const Navigation = () => {
+  const { currentUser } = useSendbirdChat();
+
   return (
-    <Container options={{ appKey: appKey, autoLogin: false }}>
-      <SendMessage />
-    </Container>
+    <NavigationContainer>
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+        {!currentUser ? (
+          <RootStack.Screen name={"SignIn"} component={SignInScreen} />
+        ) : (
+          <>
+            <RootStack.Screen
+              name={"GroupChannelList"}
+              component={GroupChannelListScreen}
+            />
+            <RootStack.Screen
+              name={"GroupChannelCreate"}
+              component={GroupChannelCreateScreen}
+            />
+            <RootStack.Screen
+              name={"GroupChannel"}
+              component={GroupChannelScreen}
+            />
+          </>
+        )}
+      </RootStack.Navigator>
+    </NavigationContainer>
   );
-}
+};
+
+export default App = () => {
+  return (
+    <SendbirdUIKitContainer
+      appId={"APP_ID"}
+      chatOptions={{ localCacheStorage: AsyncStorage }}
+      platformServices={platformServices}
+    >
+      <Navigation />
+    </SendbirdUIKitContainer>
+  );
+};
