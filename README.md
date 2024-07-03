@@ -44,5 +44,5 @@ You can generate native iOS and Android projects from your Expo config file (**a
 
 ## test
 
-main branch: test react-native-chat-uikit
+main branch: test react-native-chat-uikit  
 sendbird branch: test @sendbird
